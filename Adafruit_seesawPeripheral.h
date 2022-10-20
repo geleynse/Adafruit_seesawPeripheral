@@ -17,6 +17,10 @@ void foo(void);
 #include "Adafruit_seesawPeripheral_tinyneopixel.h"
 #endif
 
+#if CONFIG_ENCODER
+#include "Adafruit_seesawPeripheral_encoder.h"
+#endif
+
 #if !defined(CONFIG_EEPROM)
 #define CONFIG_EEPROM 1
 #endif
@@ -341,6 +345,44 @@ void Adafruit_seesawPeripheral_reset(void) {
     g_neopixel_buf[i] = 0;
   }
   g_neopixel_bufsize = 0;
+#endif
+
+#if CONFIG_ENCODER
+  for (uint8_t i = 0; i < CONFIG_NUM_ENCODERS; i++) {
+    switch (i) {
+#ifdef CONFIG_ENCODER0_A_PIN &CONFIG_ENCODER0_B_PIN
+      case 0:
+        g_encoders[i] =
+            new RotaryEncoder(CONFIG_ENCODER0_A_PIN, CONFIG_ENCODER0_B_PIN);
+        break;
+#endif
+#ifdef CONFIG_ENCODER1_A_PIN &CONFIG_ENCODER1_B_PIN
+      case 1:
+        g_encoders[i] =
+            new RotaryEncoder(CONFIG_ENCODER1_A_PIN, CONFIG_ENCODER1_B_PIN);
+        break;
+#endif
+#ifdef CONFIG_ENCODER2_A_PIN &CONFIG_ENCODER2_B_PIN
+      case 2:
+        g_encoders[i] =
+            new RotaryEncoder(CONFIG_ENCODER2_A_PIN, CONFIG_ENCODER2_B_PIN);
+        break;
+#endif
+#ifdef CONFIG_ENCODER3_A_PIN &CONFIG_ENCODER3_B_PIN
+      case 3:
+        g_encoders[i] =
+            new RotaryEncoder(CONFIG_ENCODER3_A_PIN, CONFIG_ENCODER3_B_PIN);
+        break;
+#endif
+      default:
+        return;
+    }
+    g_encoders[i]->setPosition(0);
+    g_encoder_deltas[i] = 0;
+#if CONFIG_INTERRUPT
+    g_encoder_interrupt_enabled[i] = false;
+#endif
+  }
 #endif
 
 #if CONFIG_FHT && defined(MEGATINYCORE)

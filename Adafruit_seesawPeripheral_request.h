@@ -48,6 +48,36 @@ void requestEvent(void) {
   }
 #endif
 
+#if CONFIG_ENCODER
+  else if ((base_cmd & 0x11) == SEESAW_ENCODER_BASE) {
+    uint8_t encoder = base_cmd ^ SEESAW_ENCODER_BASE;
+    if (encoder < CONFIG_NUM_ENCODERS) {
+#if CONFIG_INTERRUPT
+      g_irqFlags = 0;  // reading the gpio pins clears them
+      Adafruit_seesawPeripheral_clearIRQ();
+#endif
+      if (module_cmd == SEESAW_ENCODER_DELTA) {
+        int32_t delta = g_encoder_deltas[encoder];
+        uint8_t encoded_delta[] = {
+            (uint8_t)(delta >> 24), (uint8_t)(delta >> 16),
+            (uint8_t)(delta >> 8), (uint8_t)(delta & 0xFF)};
+        for (uint8_t i = 0; i < 4; i++) {
+          Wire.write(encoded_delta[i]);
+        }
+      } else if (module_cmd == SEESAW_ENCODER_POSITION) {
+        auto position = g_encoders[encoder]->getPosition();
+        uint8_t encoded_position[] = {
+            (uint8_t)(position >> 24), (uint8_t)(position >> 16),
+            (uint8_t)(position >> 8), (uint8_t)(position & 0xFF)};
+        for (uint8_t i = 0; i < 4; i++) {
+          Wire.write(encoded_position[i]);
+        }
+      }
+      g_encoder_deltas[encoder] = 0;
+    }
+  }
+#endif
+
 #if CONFIG_FHT && defined(MEGATINYCORE)
   else if (base_cmd == SEESAW_SPECTRUM_BASE) {
     // TO DO: change to A/B/C/D results if we decide on FHT_N = 256.

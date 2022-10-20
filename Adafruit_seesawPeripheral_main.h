@@ -53,6 +53,16 @@ void Adafruit_seesawPeripheral_run(void) {
   }
 #endif
 
+#if CONFIG_ENCODER
+  for (uint8_t encoder_index = 0; encoder_index < CONFIG_NUM_ENCODERS;
+       encoder_index++) {
+    g_encoders[encoder_index]->tick();
+
+    g_encoder_deltas[encoder_index] +=
+        static_cast<int8_t>(g_encoders[encoder_index]->getDirection());
+  }
+#endif
+
 #if CONFIG_FHT && defined(MEGATINYCORE)
   while (ADC0.INTCTRL & ADC_RESRDY_bm)
     ; // Wait for sampling to finish

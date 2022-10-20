@@ -245,6 +245,124 @@ void receiveEvent(int howMany) {
   }
 #endif
 
+#if CONFIG_ENCODER
+  else if ((base_cmd & 0x11) == SEESAW_ENCODER_BASE) {
+    uint8_t encoder_index = module_cmd & 0x0F;
+    uint8_t encoder_cmd = module_cmd & 0xF0;
+    if (encoder_index < CONFIG_NUM_ENCODERS) {
+      if (encoder_cmd == SEESAW_ENCODER_POSITION && (howMany == 6)) {
+        int32_t value = static_cast<uint32_t>(i2c_buffer[2] << 24) |
+                        static_cast<uint32_t>(i2c_buffer[3] << 16) |
+                        static_cast<uint32_t>(i2c_buffer[4] << 8) |
+                        static_cast<uint32_t>(i2c_buffer[5]);
+        g_encoders[encoder_index]->setPosition(value);
+        g_encoder_deltas[encoder_index] = 0;
+      }
+#if CONFIG_INTERRUPT
+      else if (encoder_cmd == SEESAW_ENCODER_INTENSET) {
+        switch (encoder_index) {
+#ifdef CONFIG_ENCODER0_A_PIN &CONFIG_ENCODER0_B_PIN
+          case 0:
+            g_irqGPIO |= 1UL << CONFIG_ENCODER0_A_PIN;
+            g_irqGPIO |= 1UL << CONFIG_ENCODER0_B_PIN;
+#if USE_PINCHANGE_INTERRUPT
+            attachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER0_A_PIN),
+                            Adafruit_seesawPeripheral_changedGPIO, CHANGE);
+            attachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER0_B_PIN),
+                            Adafruit_seesawPeripheral_changedGPIO, CHANGE);
+#endif
+            break;
+#endif
+#ifdef CONFIG_ENCODER1_A_PIN &CONFIG_ENCODER1_B_PIN
+          case 1:
+            g_irqGPIO |= 1UL << CONFIG_ENCODER1_A_PIN;
+            g_irqGPIO |= 1UL << CONFIG_ENCODER1_B_PIN;
+#if USE_PINCHANGE_INTERRUPT
+            attachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER1_A_PIN),
+                            Adafruit_seesawPeripheral_changedGPIO, CHANGE);
+            attachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER1_B_PIN),
+                            Adafruit_seesawPeripheral_changedGPIO, CHANGE);
+#endif
+            break;
+#endif
+#ifdef CONFIG_ENCODER2_A_PIN &CONFIG_ENCODER2_B_PIN
+          case 2:
+            g_irqGPIO |= 1UL << CONFIG_ENCODER2_A_PIN;
+            g_irqGPIO |= 1UL << CONFIG_ENCODER2_B_PIN;
+#if USE_PINCHANGE_INTERRUPT
+            attachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER2_A_PIN),
+                            Adafruit_seesawPeripheral_changedGPIO, CHANGE);
+            attachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER2_B_PIN),
+                            Adafruit_seesawPeripheral_changedGPIO, CHANGE);
+#endif
+            break;
+#endif
+#ifdef CONFIG_ENCODER3_A_PIN &CONFIG_ENCODER3_B_PIN
+          case 3:
+            g_irqGPIO |= 1UL << CONFIG_ENCODER3_A_PIN;
+            g_irqGPIO |= 1UL << CONFIG_ENCODER3_B_PIN;
+#if USE_PINCHANGE_INTERRUPT
+            attachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER3_A_PIN),
+                            Adafruit_seesawPeripheral_changedGPIO, CHANGE);
+            attachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER3_B_PIN),
+                            Adafruit_seesawPeripheral_changedGPIO, CHANGE);
+#endif
+            break;
+#endif
+          default:
+            break;
+        }
+      } else if (encoder_cmd == SEESAW_ENCODER_INTENCLR) {
+        switch (encoder_index) {
+#ifdef CONFIG_ENCODER0_A_PIN &CONFIG_ENCODER0_B_PIN
+          case 0:
+            g_irqGPIO &= ~(1UL << CONFIG_ENCODER0_A_PIN);
+            g_irqGPIO &= ~(1UL << CONFIG_ENCODER0_B_PIN);
+#if USE_PINCHANGE_INTERRUPT
+            detachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER0_A_PIN));
+            detachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER0_B_PIN));
+#endif
+            break;
+#endif
+#ifdef CONFIG_ENCODER1_A_PIN &CONFIG_ENCODER1_B_PIN
+          case 1:
+            g_irqGPIO &= ~(1UL << CONFIG_ENCODER1_A_PIN);
+            g_irqGPIO &= ~(1UL << CONFIG_ENCODER1_B_PIN);
+#if USE_PINCHANGE_INTERRUPT
+            detachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER1_A_PIN));
+            detachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER1_B_PIN));
+#endif
+            break;
+#endif
+#ifdef CONFIG_ENCODER2_A_PIN &CONFIG_ENCODER2_B_PIN
+          case 2:
+            g_irqGPIO &= ~(1UL << CONFIG_ENCODER2_A_PIN);
+            g_irqGPIO &= ~(1UL << CONFIG_ENCODER2_B_PIN);
+#if USE_PINCHANGE_INTERRUPT
+            detachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER2_A_PIN));
+            detachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER2_B_PIN));
+#endif
+            break;
+#endif
+#ifdef CONFIG_ENCODER3_A_PIN &CONFIG_ENCODER3_B_PIN
+          case 3:
+            g_irqGPIO &= ~(1UL << CONFIG_ENCODER3_A_PIN);
+            g_irqGPIO &= ~(1UL << CONFIG_ENCODER3_B_PIN);
+#if USE_PINCHANGE_INTERRUPT
+            detachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER3_A_PIN));
+            detachInterrupt(digitalPinToInterrupt(CONFIG_ENCODER3_B_PIN));
+#endif
+            break;
+#endif
+          default:
+            break;
+        }
+#endif
+      }
+    }
+  }
+#endif
+
 #if CONFIG_FHT && defined(MEGATINYCORE)
   else if (base_cmd == SEESAW_SPECTRUM_BASE) {
     if ((module_cmd == SEESAW_SPECTRUM_RATE) && (howMany == 3)) {
