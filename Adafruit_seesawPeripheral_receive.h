@@ -132,7 +132,9 @@ void receiveEvent(int howMany) {
               }
 #endif
             }
+#endif
           }
+        }
     }
   }
 
