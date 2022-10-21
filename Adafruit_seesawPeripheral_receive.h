@@ -132,11 +132,9 @@ void receiveEvent(int howMany) {
               }
 #endif
             }
-#endif
           }
         }
     }
-  }
 
 #if CONFIG_ADC
   else if (base_cmd == SEESAW_ADC_BASE) {
@@ -250,8 +248,8 @@ void receiveEvent(int howMany) {
 #if CONFIG_ENCODER
   else if ((base_cmd & 0x11) == SEESAW_ENCODER_BASE) {
     uint8_t encoder_index = module_cmd & 0x0F;
-    uint8_t encoder_cmd = module_cmd & 0xF0;
     if (encoder_index < CONFIG_NUM_ENCODERS) {
+    uint8_t encoder_cmd = module_cmd & 0xF0;
       if (encoder_cmd == SEESAW_ENCODER_POSITION && (howMany == 6)) {
         int32_t value = static_cast<uint32_t>(i2c_buffer[2] << 24) |
                         static_cast<uint32_t>(i2c_buffer[3] << 16) |
@@ -359,8 +357,8 @@ void receiveEvent(int howMany) {
           default:
             break;
         }
-#endif
       }
+#endif
     }
   }
 #endif
